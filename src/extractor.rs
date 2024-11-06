@@ -67,7 +67,14 @@ where
     let mut bytes = vec![];
 
     let node = top_candidate.node.clone();
-    scorer::clean(&mut dom, Path::new(id), node.clone(), url, &candidates);
+    scorer::clean(
+        &mut dom,
+        Path::new(id),
+        node.clone(),
+        url,
+        &candidates,
+        false,
+    );
 
     serialize(
         &mut bytes,

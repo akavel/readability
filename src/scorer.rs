@@ -310,6 +310,7 @@ pub fn clean(
     handle: Handle,
     url: &Url,
     candidates: &BTreeMap<String, Candidate>,
+    mut in_pre: bool,
 ) -> bool {
     let mut useless = false;
     match handle.data {
@@ -317,7 +318,7 @@ pub fn clean(
         Doctype { .. } => (),
         Text { ref contents } => {
             let s = contents.borrow();
-            if s.trim().is_empty() {
+            if !in_pre && s.trim().is_empty() {
                 useless = true
             }
         }
@@ -336,6 +337,7 @@ pub fn clean(
                 }
                 "img" => useless = !fix_img_path(handle.clone(), url),
                 "a" => useless = !fix_anchor_path(handle.clone(), url),
+                "pre" => in_pre = true,
                 _ => (),
             }
             dom::clean_attr("id", &mut attrs.borrow_mut());
@@ -347,7 +349,7 @@ pub fn clean(
     let mut useless_nodes = vec![];
     for (i, child) in handle.children.borrow().iter().enumerate() {
         let pid = id.join(i.to_string());
-        if clean(dom, pid.as_path(), child.clone(), url, candidates) {
+        if clean(dom, pid.as_path(), child.clone(), url, candidates, in_pre) {
             useless_nodes.push(child.clone());
         }
     }
